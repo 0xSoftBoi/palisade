@@ -32,6 +32,8 @@ is `hashlib.sha256`, which *is* the point: the assumption surface is one line.
 | `palisade.records` | §4 | `Artifact` / `CustodyEvent` / `Attestation` with a fixed, versioned schema check (no VM, no contract layer) |
 | `palisade.signatures` | §6 | Lamport OTS under a Merkle many-time signer; `HardwareModule` enforcing invariants **K1** (atomic sign-and-increment), **K2** (partitioned restoration), **K4** (fail-closed exhaustion) |
 | `palisade.checkpoint` | Definition 2 | Checkpoint certificates `CP_e = (e, h_e, |L_e|, H(CP_{e-1}), Σ_e)` and the checkpoint chain (the portable spine) |
+| `palisade.consensus` | §5, Alg. 1 | The vote/commit round: 2f+1-quorum commits, **vote-granularity equivocation** proofs, and **accountable refusal** (censorship → evidence) |
+| `palisade.batch` | §9.2 | Client batch signing — one signature over a B-leaf tree, `log₂B`-hash path per record |
 | `palisade.accountability` | Theorem 1, Proposition 1 | Transferable culpability proofs from conflicting checkpoints; **K3** on-log OTS-index reuse detection |
 | `palisade.anchoring` | Theorem 2 | External anchoring and the anchored fork bound |
 | `palisade.log` | Defs 1–2 | The checkpointed replicated log tying records, epochs, and checkpoints together |
@@ -51,12 +53,19 @@ is `hashlib.sha256`, which *is* the point: the assumption surface is one line.
 - **Stateful-key reuse is detectable (Prop. 1).** Under on-log index disclosure
   (K3), any OTS index reuse is O(1)-detectable and is itself a culpability
   proof. `tests/test_accountability.py`, `tests/test_signatures.py`.
+- **Vote-granularity accountability + censorship-as-evidence (§5).** Two votes
+  by one validator in a round yield a per-round culpability proof; f+1 signed
+  non-inclusions for a pending record convert refusal into transferable
+  evidence. `tests/test_consensus.py`.
+- **Signing cost is a parameter, not a wall (§9.2).** Batch signing amortizes
+  one client signature over a whole batch (B=1024 → one signature, a 10-hash
+  path per record). `tests/test_batch.py`.
 
 ## Quick start
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest          # 96 tests
+python -m pytest          # 111 tests
 python examples/demo.py   # full lifecycle walkthrough
 ```
 
@@ -102,16 +111,17 @@ assert proof.verify(log.tree.leaf(idx), cert.body.root)   # offline audit
 
 ## Status
 
-Implemented and tested: the history tree, records, checkpoints and chain,
-accountability proofs, anchoring, and a stateful hash-signature layer with the
-K-invariants.
+Implemented and tested: the history tree, records, checkpoints and chain, the
+vote/commit round with vote-granularity accountability and accountable refusal,
+client batch signing, accountability proofs, anchoring, and a stateful
+hash-signature layer with the K-invariants.
 
 Deliberately **not** implemented in this reference build (they are textbook or
-out of scope per the paper): the PBFT/Tendermint commit core (the honest-path
-checkpoint co-signing is modeled; the vote/view-change state machine is not),
-network transport, persistent storage, and production LMS/HSS + SLH-DSA key
-formats. The signature layer here is a hash-only analogue used to exercise the
-invariants end-to-end.
+out of scope per the paper): the PBFT/Tendermint **view-change / leader-rotation
+state machine** (single-round vote → commit is modeled; view changes and
+liveness under a faulty proposer are not), network transport, persistent
+storage, and production LMS/HSS + SLH-DSA key formats. The signature layer here
+is a hash-only analogue used to exercise the invariants end-to-end.
 
 ## License
 

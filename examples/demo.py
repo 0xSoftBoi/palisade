@@ -129,6 +129,52 @@ def main() -> None:
     print(f"  reuse of index {reuse.index} detected; proof verifies: "
           f"{reuse.verify(reg2)}")
 
+    rule("8. Algorithm 1: a vote round commits on a 2f+1 quorum")
+    from palisade.consensus import Proposal, VoteCollector, cast_vote
+    from palisade.hashing import empty_root
+
+    prop = Proposal(epoch=0, view=0, h_prev=empty_root(),
+                    records=[Artifact(content_hash=sha256(f"batch-{i}".encode()),
+                                      artifact_type="doc") for i in range(3)])
+    collector = VoteCollector(registry, quorum=log.quorum)
+    for v in validators[:3]:
+        collector.add(cast_vote(v, prop, local_root=prop.h_prev))
+    commit = collector.try_commit(prop.epoch, prop.view, prop.batch_hash(), prop.h_prev)
+    print(f"  committed with {len(commit.votes)} matching votes "
+          f"(quorum 2f+1={log.quorum}); verifies: {commit.verify(registry, log.quorum)}")
+
+    # A Byzantine validator double-votes in the same round -> per-round proof.
+    prop2 = Proposal(epoch=0, view=0, h_prev=empty_root(),
+                     records=[Artifact(content_hash=sha256(b"conflicting"), artifact_type="doc")])
+    ev = collector.add(cast_vote(validators[3], prop, local_root=prop.h_prev))
+    ev = collector.add(cast_vote(validators[3], prop2, local_root=prop2.h_prev)) or ev
+    print(f"  vote-granularity equivocation caught for {ev.validator_id}: "
+          f"{ev.verify(registry)}")
+
+    rule("9. Accountable refusal: f+1 non-inclusions turn censorship into evidence")
+    from palisade.consensus import collect_censorship_evidence, sign_non_inclusion
+
+    pending = sha256(b"well-formed-but-suppressed-record")
+    stmts = [sign_non_inclusion(validators[i], pending, epoch=0) for i in range(f + 1)]
+    censored = collect_censorship_evidence(stmts, registry, threshold=f + 1)
+    print(f"  {len(stmts)} signed non-inclusions (>= f+1={f+1}); "
+          f"evidence verifies: {censored.verify(registry, f + 1)}")
+
+    rule("10. Client batch signing: one signature covers a whole batch (section 9.2)")
+    from palisade.batch import BatchAccumulator
+    from palisade.signatures import HardwareModule
+
+    device = HardwareModule(os.urandom(32), height=6)
+    acc = BatchAccumulator()
+    for i in range(1024):
+        acc.add(Artifact(content_hash=sha256(f"telemetry-{i}".encode()),
+                         artifact_type="telemetry").canonical())
+    before = device.next_index
+    signed = acc.seal(device.sign_next)
+    print(f"  sealed B={signed.size} records with {device.next_index - before} signature; "
+          f"per-record proof depth = {len(signed.proof_for(0).audit_path)} hashes")
+    print(f"  record 500 proof verifies: {signed.proof_for(500).verify(device.public_key)}")
+
     rule("Done. Every check above reduced to SHA-256 alone.")
 
 
