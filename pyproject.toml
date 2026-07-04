@@ -30,6 +30,9 @@ dependencies = []
 [project.optional-dependencies]
 dev = ["pytest>=7"]
 
+[project.scripts]
+palisade = "palisade.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/0xSoftBoi/palisade"
 

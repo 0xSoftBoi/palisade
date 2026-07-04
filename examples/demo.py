@@ -175,6 +175,22 @@ def main() -> None:
           f"per-record proof depth = {len(signed.proof_for(0).audit_path)} hashes")
     print(f"  record 500 proof verifies: {signed.proof_for(500).verify(device.public_key)}")
 
+    rule("11. Portable spine: serialize -> hand to a third party -> verify offline")
+    from palisade.verifier import AuditBundle, OfflineVerifier, build_audit_bundle
+
+    bundle = build_audit_bundle(
+        log,
+        inclusions=[(0, art_idx)],
+        consistencies=[(0, log.chain[-1].epoch)],
+    )
+    wire = bundle.to_bytes()
+    # A third party reconstructs from bytes alone and checks against genesis keys
+    # it already holds -- no operator, no network, no live state.
+    received = AuditBundle.from_bytes(wire)
+    verdict = OfflineVerifier().verify_bundle(received, trusted_registry=registry)
+    print(f"  serialized bundle: {len(wire)} bytes, {len(bundle.chain)} checkpoints")
+    print(f"  offline verdict: {verdict.summary()}")
+
     rule("Done. Every check above reduced to SHA-256 alone.")
 
 

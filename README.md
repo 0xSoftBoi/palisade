@@ -37,6 +37,9 @@ is `hashlib.sha256`, which *is* the point: the assumption surface is one line.
 | `palisade.accountability` | Theorem 1, Proposition 1 | Transferable culpability proofs from conflicting checkpoints; **K3** on-log OTS-index reuse detection |
 | `palisade.anchoring` | Theorem 2 | External anchoring and the anchored fork bound |
 | `palisade.log` | Defs 1–2 | The checkpointed replicated log tying records, epochs, and checkpoints together |
+| `palisade.codec` | Def. 2 | Deterministic, strict wire encoding for certificates, signatures, and proofs |
+| `palisade.verifier` | Def. 2 | `AuditBundle` + `OfflineVerifier`: check a chain, record inclusions, and epoch consistency from bytes and a trusted registry alone |
+| `palisade.cli` | Def. 2 | `palisade` command — produce, inspect, and verify audit bundles |
 
 ### Guarantees, and where they are exercised
 
@@ -60,13 +63,22 @@ is `hashlib.sha256`, which *is* the point: the assumption surface is one line.
 - **Signing cost is a parameter, not a wall (§9.2).** Batch signing amortizes
   one client signature over a whole batch (B=1024 → one signature, a 10-hash
   path per record). `tests/test_batch.py`.
+- **The spine is portable and offline-verifiable (Def. 2).** A chain, registry,
+  and proofs serialize to bytes, cross a process boundary, and re-verify
+  against the verifier's *own* genesis keys — no operator, network, or live
+  state. `tests/test_codec.py`, `tests/test_verifier.py`, `tests/test_cli.py`.
 
 ## Quick start
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest          # 111 tests
+python -m pytest          # 126 tests
 python examples/demo.py   # full lifecycle walkthrough
+
+# Portable spine, from the command line:
+palisade demo-bundle bundle.plsd   # produce a self-contained audit bundle
+palisade inspect bundle.plsd       # summarize its checkpoints and claims
+palisade verify  bundle.plsd       # verify offline; exit 0 = ACCEPT
 ```
 
 ### A minimal session
@@ -113,8 +125,9 @@ assert proof.verify(log.tree.leaf(idx), cert.body.root)   # offline audit
 
 Implemented and tested: the history tree, records, checkpoints and chain, the
 vote/commit round with vote-granularity accountability and accountable refusal,
-client batch signing, accountability proofs, anchoring, and a stateful
-hash-signature layer with the K-invariants.
+client batch signing, accountability proofs, anchoring, a stateful
+hash-signature layer with the K-invariants, and a strict wire codec with an
+offline audit-bundle verifier and CLI.
 
 Deliberately **not** implemented in this reference build (they are textbook or
 out of scope per the paper): the PBFT/Tendermint **view-change / leader-rotation
