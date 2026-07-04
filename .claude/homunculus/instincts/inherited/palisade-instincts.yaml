@@ -1,0 +1,356 @@
+# Instincts generated from https://github.com/0xSoftBoi/palisade
+# Generated: 2026-07-03T17:11:28.683Z
+# Version: 2.0
+# NOTE: This file supplements (does not replace) any existing curated instincts.
+# High-confidence manually curated instincts should be preserved alongside these.
+
+---
+id: palisade-commit-length
+trigger: "when writing a commit message"
+confidence: 0.6
+domain: git
+source: repo-analysis
+source_repo: https://github.com/0xSoftBoi/palisade
+---
+
+# Palisade Commit Length
+
+## Action
+
+Write moderate-length commit messages (~62 characters)
+
+## Evidence
+
+- Average commit message length: 62 chars
+- Based on 1 commits
+
+---
+id: palisade-naming-files
+trigger: "when creating a new file"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/0xSoftBoi/palisade
+---
+
+# Palisade Naming Files
+
+## Action
+
+Use snake_case naming convention
+
+## Evidence
+
+- Analyzed file naming patterns in repository
+- Dominant pattern: snake_case
+
+---
+id: palisade-import-relative
+trigger: "when importing modules"
+confidence: 0.75
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/0xSoftBoi/palisade
+---
+
+# Palisade Import Relative
+
+## Action
+
+Use relative imports for project files
+
+## Evidence
+
+- Import analysis shows relative import pattern
+- Example: import { x } from '../lib/x'
+
+---
+id: palisade-export-style
+trigger: "when exporting from a module"
+confidence: 0.7
+domain: code-style
+source: repo-analysis
+source_repo: https://github.com/0xSoftBoi/palisade
+---
+
+# Palisade Export Style
+
+## Action
+
+Prefer named exports
+
+## Evidence
+
+- Export pattern analysis
+- Dominant style: named
+
+---
+id: palisade-test-separate
+trigger: "when writing tests"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/0xSoftBoi/palisade
+---
+
+# Palisade Test Separate
+
+## Action
+
+Place tests in the tests/ or __tests__/ directory, mirroring src structure
+
+## Evidence
+
+- Separate test directory pattern detected
+- Tests live in dedicated test folders
+
+---
+id: palisade-test-naming
+trigger: "when creating a test file"
+confidence: 0.85
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/0xSoftBoi/palisade
+---
+
+# Palisade Test Naming
+
+## Action
+
+Name test files using the pattern: *.test.ts
+
+## Evidence
+
+- File pattern: *.test.ts
+- Consistent across test files
+
+---
+id: palisade-test-types
+trigger: "when planning tests for a feature"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: https://github.com/0xSoftBoi/palisade
+---
+
+# Palisade Test Types
+
+## Action
+
+Write unit, integration tests to match project standards
+
+## Evidence
+
+- Test types detected: unit, integration
+- Coverage config: no
+
+---
+id: palisade-instinct-file-naming
+trigger: "When creating a new source file"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct File Naming
+
+## Action
+
+Name the file using snake_case
+
+## Evidence
+
+- Pattern in namingConventions.files
+
+---
+id: palisade-instinct-function-naming
+trigger: "When defining a new function"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct Function Naming
+
+## Action
+
+Use camelCase for the function name
+
+## Evidence
+
+- Pattern in namingConventions.functions
+
+---
+id: palisade-instinct-class-naming
+trigger: "When defining a new class"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct Class Naming
+
+## Action
+
+Use PascalCase for the class name
+
+## Evidence
+
+- Pattern in namingConventions.classes
+
+---
+id: palisade-instinct-constant-naming
+trigger: "When defining a constant"
+confidence: 0.9
+domain: code-style
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct Constant Naming
+
+## Action
+
+Use SCREAMING_SNAKE_CASE for the constant name
+
+## Evidence
+
+- Pattern in namingConventions.constants
+
+---
+id: palisade-instinct-import-style
+trigger: "When importing modules within the package"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct Import Style
+
+## Action
+
+Use relative imports
+
+## Evidence
+
+- Pattern in importStyle
+
+---
+id: palisade-instinct-export-style
+trigger: "When exporting functions or classes"
+confidence: 0.8
+domain: code-style
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct Export Style
+
+## Action
+
+Use named exports
+
+## Evidence
+
+- Pattern in exportStyle
+
+---
+id: palisade-instinct-test-location
+trigger: "When adding or updating tests"
+confidence: 0.9
+domain: testing
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct Test Location
+
+## Action
+
+Place test files in the separate 'tests' directory
+
+## Evidence
+
+- Pattern in architecture.folderStructure.testLocation
+
+---
+id: palisade-instinct-test-pattern
+trigger: "When naming a test file"
+confidence: 0.8
+domain: testing
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct Test Pattern
+
+## Action
+
+Use the '*.test.ts' pattern for test file names
+
+## Evidence
+
+- Pattern in testing.filePattern
+
+---
+id: palisade-instinct-test-types
+trigger: "When writing tests"
+confidence: 0.7
+domain: testing
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct Test Types
+
+## Action
+
+Include both unit and integration tests as appropriate
+
+## Evidence
+
+- Pattern in testing.testTypes
+
+---
+id: palisade-instinct-commit-format
+trigger: "When writing a commit message"
+confidence: 0.8
+domain: git
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct Commit Format
+
+## Action
+
+Write a freeform commit message without a required prefix
+
+## Evidence
+
+- Pattern in commits.type
+- Example: 'Implement PALISADE core: hash-based accountable provenance log'
+
+---
+id: palisade-instinct-commit-length
+trigger: "When composing a commit message"
+confidence: 0.7
+domain: git
+source: repo-analysis
+source_repo: 0xSoftBoi/palisade
+---
+
+# Palisade Instinct Commit Length
+
+## Action
+
+Keep the commit message concise, around 62 characters on average
+
+## Evidence
+
+- Pattern in commits.averageLength
+
