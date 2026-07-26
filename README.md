@@ -20,6 +20,28 @@ implementation of the primitive described in the working paper (v0.3).
 > built from SHA-256; a production deployment uses FIPS 140-3-validated LMS/HSS
 > (SP 800-208) and SLH-DSA (FIPS 205). See [Status](#status).
 
+### What is actually new here
+
+Append-only hash logs are a solved problem — RFC 6962, Trillian, sigsum, and
+Guardtime KSI all ship, and this log layer is deliberately
+[byte-compatible with them](tests/test_rfc6962_vectors.py). Two things are not
+solved elsewhere, and they are what this project is really about:
+
+1. **Transferable culpability, not just equivocation resistance.** A cosigned
+   log (sigsum) makes split-view *hard*; PALISADE emits a proof that names
+   **≥ f+1 specific validators**, checkable by any third party, that never
+   implicates an honest one — at vote granularity, not just per epoch.
+   Detection without attribution supports no contractual remedy.
+2. **Stateful hash-based keys engineered inside a BFT protocol.** CNSA 2.0
+   lists LMS/XMSS today, but index reuse voids them — the field failure
+   SP 800-208 exists to prevent. K1–K4 plus Proposition 1 make reuse
+   structurally impossible in the happy path and O(1)-detectable-with-proof
+   otherwise.
+
+For the full landscape review — including what this project concedes to prior
+art, and where the compliance thesis is a forecast rather than a current
+requirement — see **[docs/POSITIONING.md](docs/POSITIONING.md)**.
+
 ## What's here
 
 Everything is pure-Python standard library — the only cryptographic dependency
@@ -46,6 +68,10 @@ is `hashlib.sha256`, which *is* the point: the assumption surface is one line.
 - **Tamper-evidence (Def. 1).** Forging an inclusion or consistency proof
   implies a SHA-256 collision. `tests/test_merkle.py` checks all proofs against
   the RFC 6962 construction and rejects every tampering.
+- **Ecosystem conformance.** Roots, inclusion paths, and consistency proofs are
+  pinned to the **published RFC 6962 reference vectors**, so the log layer is
+  byte-identical to a CT-class log and the accountability layer above it could
+  sit on an existing Trillian/sigsum log. `tests/test_rfc6962_vectors.py`.
 - **Checkpoint uniqueness + (f+1)-accountability (Thm. 1).** Two conflicting
   epoch-`e` certificates yield a proof implicating ≥ f+1 validators, verifiable
   by any third party, never implicating an honest validator.
@@ -72,7 +98,7 @@ is `hashlib.sha256`, which *is* the point: the assumption surface is one line.
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest          # 126 tests
+python -m pytest          # 140 tests
 python examples/demo.py   # full lifecycle walkthrough
 
 # Portable spine, from the command line:
@@ -135,6 +161,12 @@ state machine** (single-round vote → commit is modeled; view changes and
 liveness under a faulty proposer are not), network transport, persistent
 storage, and production LMS/HSS + SLH-DSA key formats. The signature layer here
 is a hash-only analogue used to exercise the invariants end-to-end.
+
+The path from artifact to system — swap the toy signer for `cisco/hash-sigs`
+(LMS/HSS) and a real SLH-DSA binding, then retarget the accountability layer
+onto an existing sigsum/Trillian log rather than the built-in tree — is set out
+in [docs/POSITIONING.md](docs/POSITIONING.md), along with an honest accounting
+of what this project concedes to prior art.
 
 ## License
 
