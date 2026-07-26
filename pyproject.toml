@@ -28,7 +28,10 @@ classifiers = [
 dependencies = []
 
 [project.optional-dependencies]
-dev = ["pytest>=7"]
+# `cryptography` is a TEST-ONLY dependency: the sigsum interop tests sign
+# byte-exact Ed25519 over a foreign format. The runtime package remains
+# zero-dependency and hash-only -- that is the project's whole thesis.
+dev = ["pytest>=7", "cryptography>=41"]
 
 [project.scripts]
 palisade = "palisade.cli:main"

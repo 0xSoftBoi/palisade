@@ -42,6 +42,15 @@ For the full landscape review — including what this project concedes to prior
 art, and where the compliance thesis is a forecast rather than a current
 requirement — see **[docs/POSITIONING.md](docs/POSITIONING.md)**.
 
+Claim (1) was then **tested against a foreign format** by retargeting the
+attribution logic onto sigsum's real checkpoint and C2SP witness-cosignature
+formats (`palisade.interop.sigsum`). The thesis held — attribution *is*
+separable from the log — but the naive port had a serious defect: because
+sigsum puts a timestamp inside the signed bytes, PALISADE's byte-inequality
+conflict predicate **falsely accuses honest witnesses**. Findings, the
+corrected predicate, and the resulting narrower positioning are written up in
+**[docs/SIGSUM_INTEROP.md](docs/SIGSUM_INTEROP.md)**.
+
 ## What's here
 
 Everything is pure-Python standard library — the only cryptographic dependency
@@ -62,6 +71,7 @@ is `hashlib.sha256`, which *is* the point: the assumption surface is one line.
 | `palisade.codec` | Def. 2 | Deterministic, strict wire encoding for certificates, signatures, and proofs |
 | `palisade.verifier` | Def. 2 | `AuditBundle` + `OfflineVerifier`: check a chain, record inclusions, and epoch consistency from bytes and a trusted registry alone |
 | `palisade.cli` | Def. 2 | `palisade` command — produce, inspect, and verify audit bundles |
+| `palisade.interop.sigsum` | Thm. 1 ported | Attribution retargeted onto sigsum/C2SP checkpoints; corrected conflict predicate and `k`-of-`n` quorum arithmetic |
 
 ### Guarantees, and where they are exercised
 
@@ -98,7 +108,7 @@ is `hashlib.sha256`, which *is* the point: the assumption surface is one line.
 
 ```bash
 pip install -e ".[dev]"
-python -m pytest          # 140 tests
+python -m pytest          # 155 tests
 python examples/demo.py   # full lifecycle walkthrough
 
 # Portable spine, from the command line:

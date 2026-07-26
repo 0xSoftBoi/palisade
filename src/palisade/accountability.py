@@ -28,7 +28,26 @@ from .signatures import HashSignature, verify_signature
 @dataclass(frozen=True)
 class EquivocationEvidence:
     """One validator's culpability: two valid signatures over conflicting
-    epoch-``e`` checkpoint bodies."""
+    epoch-``e`` checkpoint bodies.
+
+    .. warning::
+       **Format invariant.** ``verify`` treats byte-inequality of ``body_a`` and
+       ``body_b`` as proof that the two statements conflict. That is sound here
+       only because PALISADE's canonical encodings are injective on the claim
+       *and carry no per-signature metadata* -- so differing bytes imply a
+       differing claim.
+
+       This assumption does not travel. Porting this evidence type to a format
+       whose signed bytes include per-signature metadata (a timestamp, a nonce)
+       makes the predicate unsound in the worst direction: two honest signatures
+       over the *same* claim at different times differ in bytes and would be
+       accepted as evidence, falsely implicating an honest signer and breaking
+       the half of Theorem 1(b) that matters most.
+
+       ``palisade.interop.sigsum`` demonstrates exactly this against the C2SP
+       cosignature format, and shows the corrected approach: compare the
+       *claim*, never the signed bytes. See ``docs/SIGSUM_INTEROP.md``.
+    """
 
     validator_id: str
     epoch: int
@@ -41,6 +60,7 @@ class EquivocationEvidence:
         pk = registry.public_key(self.validator_id)
         if pk is None:
             return False
+        # Sound only under the format invariant documented above.
         if self.body_a == self.body_b:
             return False  # not conflicting -> not evidence
         return verify_signature(pk, self.body_a, self.signature_a) and verify_signature(
